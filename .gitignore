@@ -1,0 +1,5 @@
+# Compiled objects and binaries
+build**/*
+
+# .vscode specific user config
+.vscode/*
