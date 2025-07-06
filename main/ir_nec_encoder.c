@@ -152,3 +152,22 @@ err:
     }
     return ret;
 }
+
+esp_err_t rmt_get_copy_enc(const rmt_encoder_t *encoder, rmt_encoder_t** ret_cpy_enc)
+{
+    if (!encoder || !ret_cpy_enc) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    rmt_ir_nec_encoder_t *nec_encoder = __containerof(encoder, rmt_ir_nec_encoder_t, base);
+
+    if (!nec_encoder->copy_encoder) {
+        ESP_LOGE(TAG, "copy_encoder is NULL");
+        return ESP_ERR_INVALID_STATE;
+    }
+
+
+    *ret_cpy_enc = nec_encoder->copy_encoder;
+
+    return ESP_OK;
+}

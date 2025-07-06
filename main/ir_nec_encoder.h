@@ -39,6 +39,14 @@ typedef struct {
  */
 esp_err_t rmt_new_ir_nec_encoder(const ir_nec_encoder_config_t *config, rmt_encoder_handle_t *ret_encoder);
 
+/**
+ * @brief Get the copy encoder out of the NEC encoder
+ * 
+ * @param encoder NEC encoder pointer
+ * @param ret_cpy_enc Return copy encoder
+ * @return esp_err_t Status code
+ */
+esp_err_t rmt_get_copy_enc(const rmt_encoder_t *encoder, rmt_encoder_t** ret_cpy_enc);
 #ifdef __cplusplus
 }
 #endif

@@ -12,10 +12,12 @@
 #include "driver/rmt_rx.h"
 #include "ir_nec_encoder.h"
 
+#include <string.h>
+
 #define EXAMPLE_IR_RESOLUTION_HZ     1000000 // 1MHz resolution, 1 tick = 1us
 #define EXAMPLE_IR_TX_GPIO_NUM       18
-#define EXAMPLE_IR_RX_GPIO_NUM       19
-#define EXAMPLE_IR_NEC_DECODE_MARGIN 200     // Tolerance for parsing RMT symbols into bit stream
+#define EXAMPLE_IR_RX_GPIO_NUM       17
+#define EXAMPLE_IR_NEC_DECODE_MARGIN 300     // Tolerance for parsing RMT symbols into bit stream
 
 /**
  * @brief NEC timing spec
@@ -29,7 +31,7 @@
 #define NEC_REPEAT_CODE_DURATION_0   9000
 #define NEC_REPEAT_CODE_DURATION_1   2250
 
-static const char *TAG = "example";
+static const char *TAG = "IR_main";
 
 /**
  * @brief Saving NEC decode results
@@ -151,6 +153,47 @@ static bool example_rmt_rx_done_callback(rmt_channel_handle_t channel, const rmt
     return high_task_wakeup == pdTRUE;
 }
 
+//TODO: Add circular buffer here
+#define MAX_FRAME_SIZE 64
+typedef struct 
+{
+    rmt_symbol_word_t rmt_frame_data[MAX_FRAME_SIZE];
+    size_t symbol_num;
+}rmt_frame_obj_t;
+
+rmt_frame_obj_t ir_cmd = {0};
+
+/**
+ * @brief Store the rmt frame
+ * 
+ * @param rmt_nec_symbols 
+ * @param symbol_num 
+ */
+static void store_rmt_frame(rmt_symbol_word_t *rmt_nec_symbols, size_t symbol_num)
+{
+    //TODO: Remove the static counter when button is implemented
+    static uint8_t cnt = 0;
+    if (cnt > 0 )
+    {
+        return;
+    }
+
+    // TODO: Add concurrency safety in the form of a circular buffer
+    if (symbol_num > MAX_FRAME_SIZE)
+    {
+        ESP_LOGE(TAG, "Failure to store frame, symbol num (%d) > MAX_FRAME_SIZE (%d)", symbol_num, MAX_FRAME_SIZE);
+        return;
+    }
+    
+
+    memcpy(ir_cmd.rmt_frame_data, rmt_nec_symbols, symbol_num * sizeof(rmt_symbol_word_t));
+    ir_cmd.symbol_num = symbol_num;
+
+
+    cnt++;
+}
+
+
 void app_main(void)
 {
     ESP_LOGI(TAG, "create RMT RX channel");
@@ -207,6 +250,11 @@ void app_main(void)
     rmt_encoder_handle_t nec_encoder = NULL;
     ESP_ERROR_CHECK(rmt_new_ir_nec_encoder(&nec_encoder_cfg, &nec_encoder));
 
+    rmt_encoder_handle_t copy_encoder;
+    rmt_copy_encoder_config_t copy_enc_config = {};
+    ESP_ERROR_CHECK(rmt_new_copy_encoder(&copy_enc_config, &copy_encoder));
+
+
     ESP_LOGI(TAG, "enable RMT TX and RX channels");
     ESP_ERROR_CHECK(rmt_enable(tx_channel));
     ESP_ERROR_CHECK(rmt_enable(rx_channel));
@@ -220,16 +268,47 @@ void app_main(void)
         // wait for RX done signal
         if (xQueueReceive(receive_queue, &rx_data, pdMS_TO_TICKS(1000)) == pdPASS) {
             // parse the receive symbols and print the result
+            store_rmt_frame(rx_data.received_symbols, rx_data.num_symbols);
             example_parse_nec_frame(rx_data.received_symbols, rx_data.num_symbols);
             // start receive again
             ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
         } else {
             // timeout, transmit predefined IR NEC packets
-            const ir_nec_scan_code_t scan_code = {
-                .address = 0x0440,
-                .command = 0x3003,
+            // const ir_nec_scan_code_t scan_code = {
+            //     .address = 0xFE01,
+            //     .command = 0x748B,
+            // };
+            // ESP_ERROR_CHECK(rmt_transmit(tx_channel, nec_encoder, &scan_code, sizeof(scan_code), &transmit_config));
+            // continue;
+
+            if (ir_cmd.symbol_num == 0)
+            {
+                continue;
+            }
+
+            /* Buffer data */
+            rmt_frame_obj_t cmd;
+            memcpy(&cmd.rmt_frame_data, ir_cmd.rmt_frame_data, ir_cmd.symbol_num * sizeof(rmt_symbol_word_t));
+            cmd.symbol_num = ir_cmd.symbol_num;
+
+            /* Replace the first element with the configured leading pulse */
+            cmd.rmt_frame_data[0] = (rmt_symbol_word_t) {
+                .level0 = 1,
+                .duration0 = 9000ULL * EXAMPLE_IR_RESOLUTION_HZ / 1000000,
+                .level1 = 0,
+                .duration1 = 4500ULL * EXAMPLE_IR_RESOLUTION_HZ / 1000000,
             };
-            ESP_ERROR_CHECK(rmt_transmit(tx_channel, nec_encoder, &scan_code, sizeof(scan_code), &transmit_config));
+
+            ESP_LOGI(TAG, "Replaying stored NEC frame with %d symbols", cmd.symbol_num);
+            example_parse_nec_frame(cmd.rmt_frame_data, cmd.symbol_num);
+
+            /* rmt_transmit is blocking */
+            esp_err_t tx_err = rmt_transmit(tx_channel, copy_encoder, cmd.rmt_frame_data, cmd.symbol_num * sizeof(rmt_symbol_word_t), &transmit_config);
+            if (tx_err != ESP_OK)
+            {
+                ESP_LOGE(TAG,"TX Failed with %d", tx_err);
+            }
+
         }
     }
 }
