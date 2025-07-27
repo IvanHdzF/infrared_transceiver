@@ -13,6 +13,7 @@
 #include "ir_nec_encoder.h"
 
 #include <string.h>
+#include <stdlib.h>
 
 #define EXAMPLE_IR_RESOLUTION_HZ     1000000 // 1MHz resolution, 1 tick = 1us
 #define EXAMPLE_IR_TX_GPIO_NUM       18
@@ -163,6 +164,69 @@ typedef struct
 
 rmt_frame_obj_t ir_cmd = {0};
 
+
+static void invert_rmt_levels(const rmt_symbol_word_t *input, 
+                              rmt_symbol_word_t *output, 
+                              size_t symbol_num)
+{
+    for (size_t i = 0; i < symbol_num; i++) {
+        output[i].level0 = !input[i].level0;
+        output[i].level1 = !input[i].level1;
+        output[i].duration0 = input[i].duration0;
+        output[i].duration1 = input[i].duration1;
+    }
+}
+
+static void normalize_rmt_durations(rmt_symbol_word_t *frame, size_t symbol_num)
+{
+    for (size_t i = 0; i < symbol_num; i++) {
+        uint32_t d0 = frame[i].duration0;
+        uint32_t d1 = frame[i].duration1;
+
+        // Try to match NEC known pulse durations first
+        if (abs((int)d0 - NEC_PAYLOAD_ZERO_DURATION_0) < 200 && abs((int)d1 - NEC_PAYLOAD_ZERO_DURATION_1) < 200) {
+            frame[i].duration0 = NEC_PAYLOAD_ZERO_DURATION_0;
+            frame[i].duration1 = NEC_PAYLOAD_ZERO_DURATION_1;
+        } else if (abs((int)d0 - NEC_PAYLOAD_ONE_DURATION_0) < 200 && abs((int)d1 - NEC_PAYLOAD_ONE_DURATION_1) < 300) {
+            frame[i].duration0 = NEC_PAYLOAD_ONE_DURATION_0;
+            frame[i].duration1 = NEC_PAYLOAD_ONE_DURATION_1;
+        } else if (abs((int)d0 - NEC_LEADING_CODE_DURATION_0) < 1000 && abs((int)d1 - NEC_LEADING_CODE_DURATION_1) < 1000) {
+            frame[i].duration0 = NEC_LEADING_CODE_DURATION_0;
+            frame[i].duration1 = NEC_LEADING_CODE_DURATION_1;
+        } else if (abs((int)d0 - NEC_REPEAT_CODE_DURATION_0) < 1000 && abs((int)d1 - NEC_REPEAT_CODE_DURATION_1) < 1000) {
+            frame[i].duration0 = NEC_REPEAT_CODE_DURATION_0;
+            frame[i].duration1 = NEC_REPEAT_CODE_DURATION_1;
+        } else {
+            // Fallback: crude k-means with 2 clusters (short, long) on the fly
+            static uint32_t short_avg = 560;
+            static uint32_t long_avg = 1690;
+
+            // Normalize duration0
+            if (abs((int)d0 - (int)short_avg) < abs((int)d0 - (int)long_avg)) {
+                frame[i].duration0 = short_avg;
+            } else {
+                frame[i].duration0 = long_avg;
+            }
+
+            // Normalize duration1
+            if (abs((int)d1 - (int)short_avg) < abs((int)d1 - (int)long_avg)) {
+                frame[i].duration1 = short_avg;
+            } else {
+                frame[i].duration1 = long_avg;
+            }
+        }
+    }
+}
+
+static void normalize_rmt_frame(const rmt_symbol_word_t *input_frame, 
+                                rmt_symbol_word_t *output_frame,
+                                size_t symbol_num)
+{
+    invert_rmt_levels(input_frame, output_frame, symbol_num);
+    normalize_rmt_durations(output_frame, symbol_num);
+}
+
+
 /**
  * @brief Store the rmt frame
  * 
@@ -191,6 +255,13 @@ static void store_rmt_frame(rmt_symbol_word_t *rmt_nec_symbols, size_t symbol_nu
 
 
     cnt++;
+}
+
+static void save_rmt_cmd(rmt_symbol_word_t *raw_symbols, size_t symbol_num)
+{
+    rmt_symbol_word_t normalized[MAX_FRAME_SIZE] = {0};
+    normalize_rmt_frame(raw_symbols, normalized, symbol_num);
+    store_rmt_frame(normalized, symbol_num);
 }
 
 
@@ -227,6 +298,7 @@ void app_main(void)
         .mem_block_symbols = 64, // amount of RMT symbols that the channel can store at a time
         .trans_queue_depth = 4,  // number of transactions that allowed to pending in the background, this example won't queue multiple transactions, so queue depth > 1 is sufficient
         .gpio_num = EXAMPLE_IR_TX_GPIO_NUM,
+        //.flags.invert_out = true,        // <-- Enable output inversion
     };
     rmt_channel_handle_t tx_channel = NULL;
     ESP_ERROR_CHECK(rmt_new_tx_channel(&tx_channel_cfg, &tx_channel));
@@ -264,16 +336,22 @@ void app_main(void)
     rmt_rx_done_event_data_t rx_data;
     // ready to receive
     ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
+
+    const ir_nec_scan_code_t scan_code = {
+            .address = 0xFE01,
+            .command = 0x748B,
+    };
+    ESP_ERROR_CHECK(rmt_transmit(tx_channel, nec_encoder, &scan_code, sizeof(scan_code), &transmit_config));
     while (1) {
         // wait for RX done signal
         if (xQueueReceive(receive_queue, &rx_data, pdMS_TO_TICKS(1000)) == pdPASS) {
             // parse the receive symbols and print the result
-            store_rmt_frame(rx_data.received_symbols, rx_data.num_symbols);
+            save_rmt_cmd(rx_data.received_symbols, rx_data.num_symbols);
             example_parse_nec_frame(rx_data.received_symbols, rx_data.num_symbols);
             // start receive again
             ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
         } else {
-            // timeout, transmit predefined IR NEC packets
+            //timeout, transmit predefined IR NEC packets
             // const ir_nec_scan_code_t scan_code = {
             //     .address = 0xFE01,
             //     .command = 0x748B,
@@ -300,7 +378,6 @@ void app_main(void)
             };
 
             ESP_LOGI(TAG, "Replaying stored NEC frame with %d symbols", cmd.symbol_num);
-            example_parse_nec_frame(cmd.rmt_frame_data, cmd.symbol_num);
 
             /* rmt_transmit is blocking */
             esp_err_t tx_err = rmt_transmit(tx_channel, copy_encoder, cmd.rmt_frame_data, cmd.symbol_num * sizeof(rmt_symbol_word_t), &transmit_config);
