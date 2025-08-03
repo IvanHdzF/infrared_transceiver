@@ -6,3 +6,7 @@ build**/*
 
 # Any logs from console
 *.txt
+
+# Python virtual env
+__pycache__/**
+venv/**
