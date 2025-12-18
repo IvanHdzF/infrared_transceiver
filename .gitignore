@@ -4,9 +4,6 @@ build**/*
 # .vscode specific user config
 .vscode/*
 
-# Any logs from console
-*.txt
-
 # Python virtual env
 __pycache__/**
 venv/**
