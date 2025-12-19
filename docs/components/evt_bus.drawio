@@ -1,0 +1,120 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36 Edg/143.0.0.0" version="29.2.7">
+  <diagram id="Q9WcIsJ1A3sa13hOz5Y2" name="Page-1">
+    <mxGraphModel dx="1418" dy="756" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-2" parent="1" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;font style=&quot;font-size: 28px;&quot;&gt;Event Bus Architecture&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="60" width="270" x="270" y="50" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-17" edge="1" parent="1" source="EUsz_TFTNNVrK1Fmaz13-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.25;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="EUsz_TFTNNVrK1Fmaz13-12">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-21" edge="1" parent="1" source="EUsz_TFTNNVrK1Fmaz13-3" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="EUsz_TFTNNVrK1Fmaz13-18">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-3" parent="1" style="rounded=0;whiteSpace=wrap;html=1;" value="Outside world" vertex="1">
+          <mxGeometry height="367" width="120" x="30" y="183" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-6" parent="1" style="swimlane;whiteSpace=wrap;html=1;" value="Event Bus internals" vertex="1">
+          <mxGeometry height="490" width="530" x="300" y="180" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-91" parent="EUsz_TFTNNVrK1Fmaz13-6" style="rounded=0;whiteSpace=wrap;html=1;dashed=1;glass=0;fillColor=none;shadow=1;strokeColor=default;" value="" vertex="1">
+          <mxGeometry height="240" width="290" x="40" y="220" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-13" edge="1" parent="EUsz_TFTNNVrK1Fmaz13-6" source="EUsz_TFTNNVrK1Fmaz13-7" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" target="EUsz_TFTNNVrK1Fmaz13-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-14" connectable="0" parent="EUsz_TFTNNVrK1Fmaz13-13" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Register EVT_ID" vertex="1">
+          <mxGeometry relative="1" x="-0.0667" y="-2" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-7" parent="EUsz_TFTNNVrK1Fmaz13-6" style="rounded=0;whiteSpace=wrap;html=1;" value="Handle - CB Function Table" vertex="1">
+          <mxGeometry height="60" width="120" x="360" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-8" parent="EUsz_TFTNNVrK1Fmaz13-6" style="rounded=0;whiteSpace=wrap;html=1;" value="Evt ID - Handles Table" vertex="1">
+          <mxGeometry height="60" width="120" x="360" y="200" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-69" edge="1" parent="EUsz_TFTNNVrK1Fmaz13-6" source="EUsz_TFTNNVrK1Fmaz13-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" target="EUsz_TFTNNVrK1Fmaz13-8">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-70" connectable="0" parent="EUsz_TFTNNVrK1Fmaz13-69" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Poll for information" vertex="1">
+          <mxGeometry relative="1" x="-0.0385" y="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-10" parent="EUsz_TFTNNVrK1Fmaz13-6" style="rounded=0;whiteSpace=wrap;html=1;strokeWidth=5;" value="Dispatcher loop" vertex="1">
+          <mxGeometry height="60" width="120" x="65" y="300" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-15" edge="1" parent="EUsz_TFTNNVrK1Fmaz13-6" source="EUsz_TFTNNVrK1Fmaz13-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.25;entryDx=0;entryDy=0;" target="EUsz_TFTNNVrK1Fmaz13-7">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-16" connectable="0" parent="EUsz_TFTNNVrK1Fmaz13-15" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Register Handle" vertex="1">
+          <mxGeometry relative="1" x="-0.2267" y="-1" as="geometry">
+            <mxPoint x="2" y="-16" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-12" parent="EUsz_TFTNNVrK1Fmaz13-6" style="rounded=0;whiteSpace=wrap;html=1;" value="Subscribe / Unsubscribe" vertex="1">
+          <mxGeometry height="30" width="130" x="80" y="80" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-4" parent="EUsz_TFTNNVrK1Fmaz13-6" style="rounded=0;whiteSpace=wrap;html=1;" value="Config file&lt;div&gt;(compile time)&lt;/div&gt;" vertex="1">
+          <mxGeometry height="100" width="100" x="400" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-67" edge="1" parent="EUsz_TFTNNVrK1Fmaz13-6" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;">
+          <mxGeometry relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="136" y="202" />
+            </Array>
+            <mxPoint x="131" y="202" as="sourcePoint" />
+            <mxPoint x="136" y="300" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-86" connectable="0" parent="EUsz_TFTNNVrK1Fmaz13-67" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Send ported enqueue" vertex="1">
+          <mxGeometry relative="1" x="-0.165" y="-3" as="geometry">
+            <mxPoint x="2" y="-10" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-88" connectable="0" parent="EUsz_TFTNNVrK1Fmaz13-67" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Received via ported queue" vertex="1">
+          <mxGeometry relative="1" x="0.6505" y="-2" as="geometry">
+            <mxPoint x="-4" y="-12" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-18" parent="EUsz_TFTNNVrK1Fmaz13-6" style="rounded=0;whiteSpace=wrap;html=1;" value="Publish" vertex="1">
+          <mxGeometry height="30" width="130" x="70" y="172" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-19" parent="EUsz_TFTNNVrK1Fmaz13-6" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 10px;&quot;&gt;*Deregister is done at pub&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="470" y="160" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-72" parent="EUsz_TFTNNVrK1Fmaz13-6" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 10px;&quot;&gt;*Handle = index + generation&lt;/font&gt;" vertex="1">
+          <mxGeometry height="30" width="110" x="370" y="40" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-71" parent="EUsz_TFTNNVrK1Fmaz13-6" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;font style=&quot;font-size: 10px;&quot;&gt;*Stale handles cleared during dispatch / subscribe&lt;/font&gt;" vertex="1">
+          <mxGeometry height="40" width="110" x="380" y="280" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-74" parent="EUsz_TFTNNVrK1Fmaz13-6" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;span style=&quot;font-size: 10px; background-color: transparent; color: light-dark(rgb(0, 0, 0), rgb(255, 255, 255));&quot;&gt;Dequeue event&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;Iterated handles&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;Validate (idx, gen)&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;Execute callbacks&lt;/span&gt;&lt;/div&gt;&lt;div style=&quot;text-align: justify;&quot;&gt;&lt;span style=&quot;font-size: 10px;&quot;&gt;Self-heal event list&lt;/span&gt;&lt;/div&gt;" vertex="1">
+          <mxGeometry height="80" width="170" x="30" y="370" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-89" parent="EUsz_TFTNNVrK1Fmaz13-6" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;CORE&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="30" y="30" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-90" parent="EUsz_TFTNNVrK1Fmaz13-6" style="text;html=1;whiteSpace=wrap;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;rounded=0;" value="&lt;b&gt;&lt;font style=&quot;font-size: 15px;&quot;&gt;PORT&lt;/font&gt;&lt;/b&gt;" vertex="1">
+          <mxGeometry height="30" width="60" x="210" y="355" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-20" connectable="0" parent="1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Deregister Handle" vertex="1">
+          <mxGeometry x="590" y="290" as="geometry">
+            <mxPoint x="-20" y="-2" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-24" edge="1" parent="1" source="EUsz_TFTNNVrK1Fmaz13-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=1.017;entryY=0.891;entryDx=0;entryDy=0;entryPerimeter=0;" target="EUsz_TFTNNVrK1Fmaz13-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="EUsz_TFTNNVrK1Fmaz13-25" connectable="0" parent="EUsz_TFTNNVrK1Fmaz13-24" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="Exec func" vertex="1">
+          <mxGeometry relative="1" x="-0.3508" y="-3" as="geometry">
+            <mxPoint x="-36" y="-7" as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
