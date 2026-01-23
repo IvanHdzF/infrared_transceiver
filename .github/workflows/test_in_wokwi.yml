@@ -37,7 +37,7 @@ jobs:
         if: ${{ github.actor == 'nektos/act' }}
         uses: espressif/esp-idf-ci-action@v1
         with:
-          esp_idf_version: "latest"
+          esp_idf_version: "v5.4.2"
           target: ${{ matrix.espidf_target }}
           path: "."
           command: >
