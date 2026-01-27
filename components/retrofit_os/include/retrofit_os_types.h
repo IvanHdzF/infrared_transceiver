@@ -63,7 +63,7 @@ typedef enum {
   EVT_NONE = 0,
 
   /* Auth */
-  EVT_AUTH_STATE_CHANGED,
+  EVT_ORCH_STATE_CHANGED,
 
   /* Comms */
   EVT_BLE_CONN_CHANGED,
@@ -180,6 +180,57 @@ typedef struct { os_cmd_reject_reason_t reason; } evt_cmd_rejected_t;
 
 typedef os_err_t (*os_init_fn_t)(void);
 typedef os_err_t (*os_process_fn_t)(const os_evt_t *evt);
+
+// TODO: Maybe move this later into cmd.h?
+typedef enum {
+	CMD_AUTH_LOGIN = 0,
+	CMD_AUTH_LOGOUT,
+	CMD_IR_LEARN_START,
+	CMD_IR_LEARN_CANCEL,
+	CMD_IR_SEND,
+	CMD_SCHED_SET_TABLE,
+	CMD_FACTORY_RESET,
+	CMD_ID_MAX
+} cmd_id_t;
+typedef struct {
+	cmd_id_t  cmd_id;
+	uint32_t  client_id;  // opaque (BLE conn handle / WiFi socket index) for op_id routing in Comms
+	const void *payload;  // optional pointer for future (schedule table, etc.)
+	uint32_t  payload_len;
+	uint32_t     flags;   // optional: sync/async, auth-required bypass, etc
+} cmd_ctx_t;
+
+typedef enum {
+	ORCH_BOOT = 0,
+	ORCH_LOCKED,
+	ORCH_NORMAL,
+} orch_state_t;
+
+typedef enum {
+	CMD_OK = 0,
+	CMD_ACCEPTED,         // accepted + async completion will arrive via EVT_*_RESULT
+	CMD_REJECTED_AUTH,
+	CMD_REJECTED_STATE,
+	CMD_INVALID_ARG,
+	CMD_BUSY,
+	CMD_NOT_SUPPORTED,
+	CMD_INTERNAL_ERR,
+} cmd_status_t;
+
+
+typedef struct {
+	cmd_status_t status;
+	uint32_t op_id;       // valid when status==CMD_ACCEPTED (or CMD_OK if you want)
+	uint32_t detail;      // optional (err code, etc.)
+} cmd_rsp_t;
+
+// Orchestrator state changed event payload (publish on evt_bus)
+typedef struct {
+	orch_state_t old_state;
+	orch_state_t new_state;
+	uint32_t reason;
+	uint32_t op_id;       // optional
+} evt_orch_state_changed_t;
 
 #ifdef __cplusplus
 }

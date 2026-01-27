@@ -119,7 +119,7 @@ void mock_system_step(uint32_t step)
   if ((step % 7u) == 0u) {
     g_auth.authed ^= 1u;
     /* define an auth payload later; for now send no payload */
-    mock_publish(OS_MOD_AUTH, EVT_AUTH_STATE_CHANGED, NULL, 0);
+    mock_publish(OS_MOD_AUTH, EVT_ORCH_STATE_CHANGED, NULL, 0);
   }
 
   if ((step % 11u) == 0u) {

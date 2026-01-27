@@ -14,6 +14,6 @@ idf_component_register(SRCS ${srcs}
                        REQUIRES 
                        retrofit_os
                        orchestrator
-                       
+                       evt_bus
                        WHOLE_ARCHIVE
                     )

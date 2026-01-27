@@ -6,6 +6,7 @@
 
 #include "mocks.h"
 #include "retrofit_os_types.h" 
+#include "evt_bus/evt_bus.h"
 
 
 //TODO: Include a generic types header that enumerates system events, types, etc.

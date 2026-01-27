@@ -19,7 +19,7 @@ endif()
 # Declared here because it gives compilation errors when being included in apps folder CMakeLists.txt
 set(APP_COMPONENTS_infrared_test "")
 set(APP_COMPONENTS_test_evt_bus "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
-set(APP_COMPONENTS_system_demo "")
+set(APP_COMPONENTS_system_demo "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
 
 
 # Function to get components for app
