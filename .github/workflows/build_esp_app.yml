@@ -43,15 +43,15 @@ jobs:
           esp_idf_version: "v5.4.2"
           target: ${{ matrix.espidf_target }}
           path: "."
-          command: >
-            bash -lc "
-            python -m pip install -U pytest pytest-embedded pytest-embedded-idf pytest-embedded-qemu &&
-            pytest apps/${{ matrix.app_name }} \
-            --junit-xml=./report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
-            --embedded-services idf,qemu \
-            --target=${{ matrix.espidf_target }} \
-            -s
-            "
+          command: |
+            bash -lc '
+              python -m pip install -U pytest pytest-embedded pytest-embedded-idf pytest-embedded-qemu
+              pytest apps/${{ matrix.app_name }} \
+                --junit-xml=report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
+                --embedded-services idf,qemu \
+                --target=${{ matrix.espidf_target }} \
+                -s
+            '
         # Skip artifact upload when running under act (no runtime token)
       - name: Upload test results
         if: ${{ !env.ACT }}
