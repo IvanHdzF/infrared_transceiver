@@ -1,0 +1,55 @@
+# Run `pre-commit autoupdate` to update to the latest pre-commit hooks version.
+
+minimum_pre_commit_version: 3.3.0 # Specifies the minimum version of pre-commit required for this configuration
+default_install_hook_types: [pre-commit, commit-msg] # Default hook types to install if not specified in individual hooks
+default_stages: [commit]
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: trailing-whitespace # Removes trailing whitespaces from lines
+      - id: end-of-file-fixer # Ensures files end with a newline
+      - id: check-executables-have-shebangs # Checks executables have a proper shebang
+      - id: check-shebang-scripts-are-executable # Checks that scripts with shebangs are executable.
+      - id: check-case-conflict # Check conflict on a case-insensitive filesystem (MacOS HFS+/Windows FAT).
+      - id: mixed-line-ending # Detects mixed line endings (CRLF/LF)
+        args: ["-f=lf"] # Forces files to use LF line endings
+
+  - repo: https://github.com/espressif/astyle_py.git
+    rev: v1.0.5
+    hooks:
+      - id: astyle_py # C code linter/formatter
+        args:
+          - --astyle-version=3.4.7
+          - --style=linux
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets  # Detection of unwanted commit secrets and tokes
+        args:
+          - --base64-limit=4 # Level of entropy for base64 type strings
+          - --hex-limit=3 # Level of entropy for hex strings
+
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.17
+    hooks:
+      - id: mdformat
+        args: [--number] # Keep numbering for ordered lists
+        additional_dependencies:
+          - mdformat-gfm # Support for GitHub Flavored Markdown (GFM), including tables, task lists, strikethroughs, and autolinks.
+          - mdformat-simple-breaks # Ensures that single line breaks in Markdown are converted to `<br>` t
+
+  - repo: https://github.com/codespell-project/codespell
+    rev: v2.3.0
+    hooks:
+      - id: codespell # Spell checker
+        args: ["--write-changes"]
+        additional_dependencies: [tomli]
+        exclude: '\.svg$'
+
+  - repo: https://github.com/espressif/conventional-precommit-linter
+    rev: v1.10.0
+    hooks:
+      - id: conventional-precommit-linter # Lints commit messages for conventional format
+        stages: [commit-msg]

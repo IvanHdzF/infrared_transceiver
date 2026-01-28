@@ -80,7 +80,7 @@ TEST_CASE("orch: state change event gates commands", "[orch]")
 TEST_CASE("orch: login allowed while locked", "[orch]")
 {
     reset_mocks();
-
+    evt_bus_init();
     orch_init();
 
     evt_orch_state_changed_t lock_evt = {
@@ -90,6 +90,8 @@ TEST_CASE("orch: login allowed while locked", "[orch]")
         .op_id = 0,
     };
     evt_bus_publish(EVT_ORCH_STATE_CHANGED, &lock_evt, sizeof(lock_evt));
+    /* Wait for dispatch event */
+    vTaskDelay(pdMS_TO_TICKS(SETTLING_TIME_MS));
 
     cmd_ctx_t login = {
         .cmd_id = CMD_AUTH_LOGIN,
