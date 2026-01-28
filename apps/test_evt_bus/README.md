@@ -10,7 +10,7 @@ This application contains **hardware-in-the-loop (HIL) integration tests** for t
 
 ## What’s being tested
 
-The firmware runs **Unity** tests on-device and prints standard Unity output.  
+The firmware runs **Unity** tests on-device and prints standard Unity output.
 The Python harness connects to the DUT, synchronizes on Unity output, and then parses the captured log to:
 
 - Verify overall PASS/FAIL (`OK` / `FAIL`)
@@ -29,6 +29,7 @@ pytest   --junit-xml=./test_app_results_esp32s3.xml   --embedded-services idf,es
 ```
 
 ### Notes
+
 - `--embedded-services idf,esp` selects the ESP-IDF build + **real hardware** runner (serial DUT).
 - `--target` selects the ESP-IDF target (`esp32` or `esp32s3`).
 
@@ -59,12 +60,16 @@ test_evt_bus/
 ## Troubleshooting
 
 ### Unity output has timestamps / colors
+
 The harness already normalizes logs by:
+
 - removing leading timestamps per-line (if present)
 - removing ANSI escape sequences
 
 ### Timeouts waiting for Unity output
+
 Increase timeouts in `test_evt_bus_main.py` or confirm:
+
 - correct serial port / board is connected
 - the firmware flashed successfully
 - the DUT boots and prints Unity banner/summary

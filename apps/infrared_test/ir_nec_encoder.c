@@ -166,7 +166,6 @@ esp_err_t rmt_get_copy_enc(const rmt_encoder_t *encoder, rmt_encoder_t** ret_cpy
         return ESP_ERR_INVALID_STATE;
     }
 
-
     *ret_cpy_enc = nec_encoder->copy_encoder;
 
     return ESP_OK;

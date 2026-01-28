@@ -5,9 +5,8 @@
 #include "esp_log.h"
 
 #include "mocks.h"
-#include "retrofit_os_types.h" 
+#include "retrofit_os_types.h"
 #include "evt_bus/evt_bus.h"
-
 
 //TODO: Include a generic types header that enumerates system events, types, etc.
 
@@ -21,7 +20,7 @@ static void system_demo_init(void)
     // Initialization code for the system demo application
     ESP_LOGI(TAG, "System demo initialized.");
 
-    // Initialize components 
+    // Initialize components
     mock_event_bus_init();
     mock_storage_init();
     mock_clock_init();

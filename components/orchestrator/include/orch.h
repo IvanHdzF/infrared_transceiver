@@ -7,7 +7,6 @@ extern "C" {
 
 #include "retrofit_os_types.h"
 
-
 void orch_init(void);
 
 os_err_t orch_process_req(const cmd_ctx_t* ctx);

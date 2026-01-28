@@ -15,5 +15,3 @@ def test_ir_nec_example(dut: Dut) -> None:
     dut.expect('IR_main: install IR NEC encoder')
     dut.expect('IR_main: enable RMT TX and RX channels')
     dut.expect('NEC frame start---')
-
-

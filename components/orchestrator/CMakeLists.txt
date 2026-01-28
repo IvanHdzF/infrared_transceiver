@@ -17,4 +17,3 @@ idf_component_register(
         retrofit_os
         evt_bus
 )
-

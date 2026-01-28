@@ -21,6 +21,7 @@ This section documents the primary end-to-end flows across modules. These flows 
 9. BLE Comms (subscriber) -> Mobile App: Notify auth status / error code
 
 **Notes**
+
 - BLE bonding/encryption is enforced before this flow (protocol-level security).
 - App-level auth is a second gate; capabilities are revoked on timeout or disconnect.
 
@@ -51,34 +52,34 @@ sequenceDiagram
     end
 ```
 
-
 ---
 
 ## Flow 2: Program an IR Slot (Learn + Commit)
 
 **Goal:** Capture raw IR data and store it atomically in slot `N`.
 
-1. Mobile App -> BLE Comms: Write `PROGRAM_SLOT(slot=N, timeout=T)`
-2. BLE Comms -> CMD Service: `CMD_PROGRAM_SLOT(N, T)`
-3. CMD Service -> Orchestrator: `PROGRAM_SLOT_REQUEST(N, T)`
-4. Orchestrator:
-   - verify `CAN_PROGRAM`
-   - transition FSM -> `PROGRAMMING_MODE`
-   - disable schedule execution (policy)
-5. Orchestrator -> Infrared Service: `ir_learn_start(slot=N, timeout=T)`
-6. Infrared Service:
-   - enable IR RX
-   - capture raw data + transport metadata (len/crc/carrier/repeat)
-7. Infrared Service -> Event Bus: `EVT_IR_LEARN_RESULT(slot=N, ok/fail, crc, len, err_code)`
-8. Orchestrator (subscriber or direct callback):
-   - if ok: request persistence
-     - Orchestrator -> Storage Service: `store_ir_slot(N, header+blob)`
-     - Storage Service -> Event Bus: `EVT_IR_SLOT_WRITTEN(N, ok/fail)`
-   - exit `PROGRAMMING_MODE` on completion/failure/timeout
-9. Error Manager -> BLE/Wi-Fi Comms: publish alert if failure
+01. Mobile App -> BLE Comms: Write `PROGRAM_SLOT(slot=N, timeout=T)`
+02. BLE Comms -> CMD Service: `CMD_PROGRAM_SLOT(N, T)`
+03. CMD Service -> Orchestrator: `PROGRAM_SLOT_REQUEST(N, T)`
+04. Orchestrator:
+    - verify `CAN_PROGRAM`
+    - transition FSM -> `PROGRAMMING_MODE`
+    - disable schedule execution (policy)
+05. Orchestrator -> Infrared Service: `ir_learn_start(slot=N, timeout=T)`
+06. Infrared Service:
+    - enable IR RX
+    - capture raw data + transport metadata (len/crc/carrier/repeat)
+07. Infrared Service -> Event Bus: `EVT_IR_LEARN_RESULT(slot=N, ok/fail, crc, len, err_code)`
+08. Orchestrator (subscriber or direct callback):
+    - if ok: request persistence
+      - Orchestrator -> Storage Service: `store_ir_slot(N, header+blob)`
+      - Storage Service -> Event Bus: `EVT_IR_SLOT_WRITTEN(N, ok/fail)`
+    - exit `PROGRAMMING_MODE` on completion/failure/timeout
+09. Error Manager -> BLE/Wi-Fi Comms: publish alert if failure
 10. BLE Comms -> Mobile App: notify result
 
 **Notes**
+
 - IR Service owns the slot schema; Storage Service owns flash writes.
 - Commit must be atomic (avoid partial slot writes).
 
@@ -134,8 +135,10 @@ sequenceDiagram
 9. BLE/Wi-Fi Comms -> requester: ACK/ERR
 
 **Notes**
+
 - Scheduler should operate from RAM; storage persistence is on update, not periodic polling.
 - If time is invalid, schedule may be stored but not executed (emit warning).
+
 ```mermaid
 sequenceDiagram
     participant App as App / Backend
@@ -159,9 +162,8 @@ sequenceDiagram
 
     COMMS-->>App: ACK / ERR
 ```
+
 ---
-
-
 
 ## Flow 4: Scheduled Execution (Time -> Routine -> IR)
 
@@ -183,6 +185,7 @@ sequenceDiagram
    - if fail: raise alert -> Comms notify user / MQTT
 
 **Notes**
+
 - Orchestrator may optionally gate execution based on current FSM state (e.g., block during Programming/Updating).
 - Time jumps must not cause double-fire (use `last_run` + policy).
 
@@ -207,6 +210,7 @@ sequenceDiagram
 
 
 ```
+
 ---
 
 ## Flow 5: Error Propagation (Any Module -> User)
@@ -221,7 +225,6 @@ sequenceDiagram
 3. Error Manager -> Event Bus: `EVT_ALERT(code)`
 4. BLE/Wi-Fi Comms (subscriber):
    - notify BLE error characteristic and/or publish MQTT
-
 
 ```mermaid
 sequenceDiagram
