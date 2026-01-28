@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 # Choose which app to build
-set(APP_NAME "test_orchestrator" CACHE STRING "Select which application to build")
+set(APP_NAME "test_stg_man" CACHE STRING "Select which application to build")
 message(STATUS "Building application: ${APP_NAME}")
 
 # Paths
@@ -42,6 +42,7 @@ set(APP_COMPONENTS_infrared_test "")
 set(APP_COMPONENTS_test_evt_bus "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
 set(APP_COMPONENTS_system_demo "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
 set(APP_COMPONENTS_test_orchestrator "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
+set(APP_COMPONENTS_test_stg_man "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
 
 # Function to get components for app
 function(get_app_components app_name out_var)
