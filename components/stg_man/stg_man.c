@@ -35,7 +35,8 @@ typedef struct __attribute__((packed))
     uint16_t reserved;
     uint32_t payload_len;
     uint32_t header_crc;
-} stg_man_hdr_t;
+}
+stg_man_hdr_t;
 
 static void stg_lock(void)
 {
@@ -231,11 +232,11 @@ esp_err_t stg_man_init(const stg_man_cfg_t *cfg)
     };
 
     err = esp_vfs_fat_spiflash_mount_rw_wl(
-        cfg->base_path,
-        cfg->partition_label,
-        &mount_config,
-        &s_wl_handle
-    );
+              cfg->base_path,
+              cfg->partition_label,
+              &mount_config,
+              &s_wl_handle
+          );
     if (err != ESP_OK) {
         ESP_LOGE(TAG, "mount failed: %s", esp_err_to_name(err));
         s_wl_handle = WL_INVALID_HANDLE;

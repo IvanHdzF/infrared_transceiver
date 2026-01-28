@@ -333,7 +333,8 @@ TEST_CASE("stg_man detects corruption (version mismatch)", "[stg_man]")
         uint16_t reserved;
         uint32_t payload_len;
         uint32_t header_crc;
-    } hdr = {
+    }
+    hdr = {
         .magic = 0x434F4F4CUL,   // 'COOL'
         .version = 0x9999,       // wrong
         .reserved = 0,
@@ -352,9 +353,6 @@ TEST_CASE("stg_man detects corruption (version mismatch)", "[stg_man]")
     err = stg_man_read(NULL, out, sizeof(out), &out_len);
     TEST_ASSERT_EQUAL(ESP_ERR_INVALID_VERSION, err);
 }
-
-
-
 
 /* ---------------- App entry ---------------- */
 

@@ -15,8 +15,7 @@ extern "C" {
  * Describes how the storage manager mounts and manages
  * a FAT filesystem backed by wear leveling.
  */
-typedef struct
-{
+typedef struct {
     /** Mount point registered in VFS (e.g. "/spiflash"). */
     const char *base_path;
 
