@@ -156,17 +156,15 @@ static bool example_rmt_rx_done_callback(rmt_channel_handle_t channel, const rmt
 
 //TODO: Add circular buffer here
 #define MAX_FRAME_SIZE 64
-typedef struct 
-{
+typedef struct {
     rmt_symbol_word_t rmt_frame_data[MAX_FRAME_SIZE];
     size_t symbol_num;
-}rmt_frame_obj_t;
+} rmt_frame_obj_t;
 
 rmt_frame_obj_t ir_cmd = {0};
 
-
-static void invert_rmt_levels(const rmt_symbol_word_t *input, 
-                              rmt_symbol_word_t *output, 
+static void invert_rmt_levels(const rmt_symbol_word_t *input,
+                              rmt_symbol_word_t *output,
                               size_t symbol_num)
 {
     for (size_t i = 0; i < symbol_num; i++) {
@@ -218,7 +216,7 @@ static void normalize_rmt_durations(rmt_symbol_word_t *frame, size_t symbol_num)
     }
 }
 
-static void normalize_rmt_frame(const rmt_symbol_word_t *input_frame, 
+static void normalize_rmt_frame(const rmt_symbol_word_t *input_frame,
                                 rmt_symbol_word_t *output_frame,
                                 size_t symbol_num)
 {
@@ -226,33 +224,28 @@ static void normalize_rmt_frame(const rmt_symbol_word_t *input_frame,
     normalize_rmt_durations(output_frame, symbol_num);
 }
 
-
 /**
  * @brief Store the rmt frame
- * 
- * @param rmt_nec_symbols 
- * @param symbol_num 
+ *
+ * @param rmt_nec_symbols
+ * @param symbol_num
  */
 static void store_rmt_frame(rmt_symbol_word_t *rmt_nec_symbols, size_t symbol_num)
 {
     //TODO: Remove the static counter when button is implemented
     static uint8_t cnt = 0;
-    if (cnt > 0 )
-    {
+    if (cnt > 0 ) {
         return;
     }
 
     // TODO: Add concurrency safety in the form of a circular buffer
-    if (symbol_num > MAX_FRAME_SIZE)
-    {
+    if (symbol_num > MAX_FRAME_SIZE) {
         ESP_LOGE(TAG, "Failure to store frame, symbol num (%d) > MAX_FRAME_SIZE (%d)", symbol_num, MAX_FRAME_SIZE);
         return;
     }
-    
 
     memcpy(ir_cmd.rmt_frame_data, rmt_nec_symbols, symbol_num * sizeof(rmt_symbol_word_t));
     ir_cmd.symbol_num = symbol_num;
-
 
     cnt++;
 }
@@ -263,7 +256,6 @@ static void save_rmt_cmd(rmt_symbol_word_t *raw_symbols, size_t symbol_num)
     normalize_rmt_frame(raw_symbols, normalized, symbol_num);
     store_rmt_frame(normalized, symbol_num);
 }
-
 
 void app_main(void)
 {
@@ -326,7 +318,6 @@ void app_main(void)
     rmt_copy_encoder_config_t copy_enc_config = {};
     ESP_ERROR_CHECK(rmt_new_copy_encoder(&copy_enc_config, &copy_encoder));
 
-
     ESP_LOGI(TAG, "enable RMT TX and RX channels");
     ESP_ERROR_CHECK(rmt_enable(tx_channel));
     ESP_ERROR_CHECK(rmt_enable(rx_channel));
@@ -338,8 +329,8 @@ void app_main(void)
     ESP_ERROR_CHECK(rmt_receive(rx_channel, raw_symbols, sizeof(raw_symbols), &receive_config));
 
     const ir_nec_scan_code_t scan_code = {
-            .address = 0xFE01,
-            .command = 0x748B,
+        .address = 0xFE01,
+        .command = 0x748B,
     };
     ESP_ERROR_CHECK(rmt_transmit(tx_channel, nec_encoder, &scan_code, sizeof(scan_code), &transmit_config));
     while (1) {
@@ -359,8 +350,7 @@ void app_main(void)
             // ESP_ERROR_CHECK(rmt_transmit(tx_channel, nec_encoder, &scan_code, sizeof(scan_code), &transmit_config));
             // continue;
 
-            if (ir_cmd.symbol_num == 0)
-            {
+            if (ir_cmd.symbol_num == 0) {
                 continue;
             }
 
@@ -381,8 +371,7 @@ void app_main(void)
 
             /* rmt_transmit is blocking */
             esp_err_t tx_err = rmt_transmit(tx_channel, copy_encoder, cmd.rmt_frame_data, cmd.symbol_num * sizeof(rmt_symbol_word_t), &transmit_config);
-            if (tx_err != ESP_OK)
-            {
+            if (tx_err != ESP_OK) {
                 ESP_LOGE(TAG,"TX Failed with %d", tx_err);
             }
 

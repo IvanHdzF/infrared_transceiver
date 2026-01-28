@@ -1,11 +1,12 @@
 # Development Plan
 
-This document defines a sprint-like plan to implement the IR Minisplit Retrofit Controller in incremental, testable milestones.  
+This document defines a sprint-like plan to implement the IR Minisplit Retrofit Controller in incremental, testable milestones.
 Priority is given to **clean interfaces**, **unit-testable modules**, and **early end-to-end validation on hardware**.
 
 ---
 
 ## Guiding Principles
+
 - Implement **interfaces first**, then internals.
 - Prefer **single-writer storage** and **single-threaded service tasks** to reduce race bugs.
 - Make each sprint end with a **demoable artifact** (CLI, BLE command, or hardware behavior).
@@ -14,9 +15,11 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
 ---
 
 ## Sprint 0 — Repo + Scaffolding (Foundation)
+
 **Goal:** Establish project structure, build/test harness, and coding conventions.
 
 ### Deliverables
+
 - `docs/` skeleton: `DESIGN.md`, `SYSTEM_REQUIREMENTS.md`, `DESIGN_TRADEOFFS.md`, `DEVELOPMENT_PLAN.md`
 - Component doc templates under `docs/components/`
 - Project structure (suggested):
@@ -33,21 +36,25 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
   - “HAL shims” for ESP-IDF types where needed
 
 ### Exit Criteria
+
 - Build + run unit tests in CI/local
 - Lint/format rules documented
 
 ---
 
 ## Sprint 1 — Event Bus (Core Plumbing)
+
 **Goal:** Implement a minimal, reliable Event Bus for async events.
 
 ### Scope
+
 - Fixed-size event struct: type + small payload (IDs/codes only)
 - Publish/subscribe API
 - Backpressure strategy (drop-oldest or drop-newest) documented
 - Optional event tracing hook (for debugging tests)
 
 ### Deliverables
+
 - `event_bus.h/.c` with:
   - `eventbus_publish(evt)`
   - `eventbus_subscribe(mask, callback)` OR per-subscriber queue creation
@@ -57,15 +64,18 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
   - concurrency-safe publish from ISR-safe context (if applicable)
 
 ### Exit Criteria
+
 - Deterministic behavior under queue pressure
 - Documented constraints (max subscribers, queue depth)
 
 ---
 
 ## Sprint 2 — Storage Service (Single Writer + Integrity)
+
 **Goal:** Centralize persistence and define atomic commit behavior.
 
 ### Scope
+
 - Storage API supports:
   - store/load IR slot blob+header
   - store/load schedule table blob
@@ -75,20 +85,24 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
 - Cache model documented (valid/dirty semantics)
 
 ### Deliverables
+
 - `storage_service.h/.c`
 - Host tests using simulated flash buffer (no ESP dependencies)
 - ESP integration wrapper (NVS/partition) behind `storage_hal`
 
 ### Exit Criteria
+
 - No other module writes NVM directly
 - Corruption detection paths emit `EVT_STORAGE_CORRUPT` events
 
 ---
 
 ## Sprint 3 — Infrared Service (Core + HAL Split)
+
 **Goal:** Implement IR learn/send with a reusable middleware boundary.
 
 ### Scope
+
 - IR public API:
   - learn start/abort
   - send slot
@@ -102,6 +116,7 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
   - TX waveform → RMT symbols
 
 ### Deliverables
+
 - `ir_service/`:
   - `ir_service.h/.c` (service + state machine)
   - `ir_core.h/.c` (platform-agnostic waveform utilities)
@@ -113,21 +128,25 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
   - learn one command, replay it
 
 ### Exit Criteria
+
 - `EVT_IR_LEARN_RESULT`, `EVT_IR_SEND_RESULT`, `EVT_ERROR(IR_*)` emitted correctly
 - No races between learn/send (policy enforced)
 
 ---
 
 ## Sprint 4 — Scheduler Service (MVP Polling)
+
 **Goal:** Persist schedules and trigger actions with coarse resolution.
 
 ### Scope
+
 - Schedule table stored in RAM + persisted on update
 - MVP polling (30–60s)
 - `last_run` markers + missed-run policy (SKIP_MISSED recommended)
 - Emits `EVT_SCHEDULE_DUE(schedule_id, action)`
 
 ### Deliverables
+
 - `scheduler_service.h/.c`
 - Unit tests:
   - recurrence logic
@@ -137,14 +156,17 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
   - Scheduler triggers IR Service via event bus
 
 ### Exit Criteria
+
 - No double-fire across reboot/time change under tested scenarios
 
 ---
 
 ## Sprint 5 — Authentication + Orchestrator FSM (System Control)
+
 **Goal:** Implement capability gating and system states.
 
 ### Scope
+
 - Orchestrator states:
   - UNAUTH, NORMAL, PROGRAMMING, UPDATING (stub)
 - Capability mask gating:
@@ -156,6 +178,7 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
   - `EVT_AUTH_STATE_CHANGED`
 
 ### Deliverables
+
 - `orchestrator.h/.c`
 - `auth_system.h/.c`
 - Unit tests:
@@ -164,15 +187,18 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
   - capability timeouts
 
 ### Exit Criteria
+
 - Programming mode blocks scheduling and vice-versa (policy enforced)
 - Clean, testable command gating
 
 ---
 
 ## Sprint 6 — BLE Comms (Minimal Vertical Slice)
+
 **Goal:** First complete end-to-end demo path from phone to hardware.
 
 ### Scope
+
 - Minimal GATT:
   - command write characteristic
   - response notify characteristic
@@ -181,6 +207,7 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
 - App-level auth characteristic (password) if desired
 
 ### Deliverables
+
 - BLE command → CMD Service → Orchestrator → IR learn/send
 - BLE notify of results/errors
 - Short demo script:
@@ -189,42 +216,51 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
   - trigger send
 
 ### Exit Criteria
+
 - Working demo with phone + real IR
 
 ---
 
 ## Sprint 7 — Wi-Fi Manager + MQTT (Optional MVP+)
+
 **Goal:** Provision Wi-Fi and publish alerts.
 
 ### Scope
+
 - Wi-Fi provisioning flow (smartconfig/captive portal/etc.)
 - MQTT publish for alerts/errors (optional)
 - Events:
   - `EVT_WIFI_STATE_CHANGED`, `EVT_MQTT_STATE_CHANGED`
 
 ### Exit Criteria
+
 - Error Manager can route alerts via Wi-Fi when available
 
 ---
 
 ## Sprint 8 — OTA (Later / Post-MVP)
+
 **Goal:** Add firmware update support with safe gating.
 
 ### Scope
+
 - Orchestrator UPDATING state
 - MCUboot-compatible flow (if chosen)
 - Progress events
 
 ### Exit Criteria
+
 - Update does not interfere with normal operation
 - Rollback behavior verified
 
 ---
 
 ## Suggested Implementation Order (If You Want Fastest Value)
-1) Event Bus → 2) Storage → 3) IR Service → 4) Scheduler → 5) Orchestrator/Auth → 6) BLE
+
+1. Event Bus → 2) Storage → 3) IR Service → 4) Scheduler → 5) Orchestrator/Auth → 6) BLE
 
 Rationale:
+
 - IR + Storage are the technical core
 - Event bus makes everything composable
 - Orchestrator comes after services exist to gate
@@ -233,6 +269,7 @@ Rationale:
 ---
 
 ## Definition of Done (Per Sprint)
+
 - Unit tests for core logic (host)
 - Component doc updated in `docs/components/`
 - One hardware smoke test (when applicable)

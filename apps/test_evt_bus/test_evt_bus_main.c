@@ -51,7 +51,8 @@ static const char *TAG = "EVT_BUS_ITEST";
 /* =========================
  * Handle validity helper
  * ========================= */
-static inline bool evt_handle_is_valid(evt_sub_handle_t h) {
+static inline bool evt_handle_is_valid(evt_sub_handle_t h)
+{
     return h.id != EVT_HANDLE_ID_INVALID;
 }
 
@@ -81,10 +82,12 @@ static SemaphoreHandle_t g_sem_stale_handle_done = NULL;
 /* =========================
  * Payloads
  * ========================= */
-typedef struct __attribute__((packed)) {
+typedef struct __attribute__((packed))
+{
     uint32_t seq;
     uint8_t  bytes[12];
-} itest_payload_t;
+}
+itest_payload_t;
 
 /* =========================
  * Callbacks
@@ -120,13 +123,15 @@ static void cb_stack_copy(const evt_t *evt, void *user_ctx)
 
 static void cb_slow_blocker(const evt_t *evt, void *user_ctx)
 {
-    (void)evt; (void)user_ctx;
+    (void)evt;
+    (void)user_ctx;
     vTaskDelay(pdMS_TO_TICKS(EVT_ITEST_SLOW_CB_DELAY_MS));
 }
 
 static void cb_must_not_run(const evt_t *evt, void *user_ctx)
 {
-    (void)evt; (void)user_ctx;
+    (void)evt;
+    (void)user_ctx;
     TEST_FAIL_MESSAGE("cb_must_not_run executed but should have been prevented by unsubscribe-before-dispatch.");
 }
 
@@ -167,7 +172,8 @@ static void cb_stale_new_sub(const evt_t *evt, void *user_ctx)
 
 static void cb_overflow_sink(const evt_t *evt, void *user_ctx)
 {
-    (void)evt; (void)user_ctx;
+    (void)evt;
+    (void)user_ctx;
 }
 
 /* =========================
@@ -404,7 +410,6 @@ static void test_fr_no_heartbeat_when_disabled(void)
     TEST_IGNORE_MESSAGE("Heartbeat enabled (EVT_BUS_FREERTOS_HEARTBEAT_TICKS_MS>0)");
 #endif
 }
-
 
 /* =========================
  * Unity test runner

@@ -5,12 +5,14 @@
 This project uses a lightweight **ESP-IDF mini-framework** to support multiple independent applications within a single firmware repository.
 
 The framework is intentionally simple:
+
 - A single top-level `CMakeLists.txt` selects which application to build
 - Applications are isolated in `apps/<app_name>/`
 - Core system components are always compiled
 - Optional middleware components are included only when required by an application
 
 The goal is to:
+
 - Enable rapid prototyping of system components
 - Allow vertical “demo apps” for verification
 - Keep ESP-IDF build behavior predictable
@@ -32,6 +34,7 @@ This is not a general-purpose framework; it is a pragmatic structure optimized f
 ---
 
 ## Repository Structure
+
 ```
 apps/
   system_demo/
@@ -50,6 +53,7 @@ middlewares/
 managed_components/
   <esp-idf managed libraries>
 ```
+
 ---
 
 ## Application Selection Mechanism
@@ -63,6 +67,7 @@ Applications are selected at build time:
 idf.py -DAPP_NAME=system_demo build
 
 The build system validates that:
+
 ```
 apps/${APP_NAME}/CMakeLists.txt
 ```
@@ -78,6 +83,7 @@ exists, otherwise the build fails early.
 All modules under `components/` are always compiled.
 
 These include:
+
 - Orchestrator
 - Event Bus
 - Storage Service
@@ -88,6 +94,7 @@ These include:
 This simplifies linking and avoids conditional compilation across system boundaries.
 
 Unused functionality may later be optimized out via:
+
 - link-time optimization
 - Kconfig feature flags
 
@@ -96,6 +103,7 @@ Unused functionality may later be optimized out via:
 ### Middleware Components
 
 Middleware modules are:
+
 - Optional
 - Selected per application
 - Ideally independent of ESP-IDF and system logic
@@ -107,17 +115,20 @@ Example:
 ```
 set(APP_COMPONENTS_infrared_test "")
 ```
+
 A helper function resolves middleware for the selected application:
 
 ```
 get_app_components(${APP_NAME} APP_REQUIREMENTS)
 set(EXTRA_COMPONENT_DIRS ${APP_PATH} ${APP_REQUIREMENTS})
 ```
+
 ---
 
 ## Application CMakeLists.txt Responsibilities
 
 Each application:
+
 - Declares its source files
 - Declares ESP-IDF–specific dependencies
 - Does not modify global build configuration
@@ -139,6 +150,7 @@ idf_component_register(
 Each application provides its own `app_main()`.
 
 This enables:
+
 - Hardware bring-up tests
 - Vertical verification of individual services
 - Minimal demo applications
@@ -199,6 +211,7 @@ These are deferred intentionally to keep the framework simple and robust.
 ## Summary
 
 This mini-framework prioritizes:
+
 - Predictability over flexibility
 - Explicit configuration over automation
 - Reusability over clever abstractions

@@ -32,7 +32,6 @@ os_err_t mock_sched_init(void);
 os_err_t mock_ir_init(void);
 os_err_t mock_cmd_init(void);
 
-
 void mock_system_step(uint32_t step);
 
 #ifdef __cplusplus

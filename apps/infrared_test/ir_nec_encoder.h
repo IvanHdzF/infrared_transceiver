@@ -41,7 +41,7 @@ esp_err_t rmt_new_ir_nec_encoder(const ir_nec_encoder_config_t *config, rmt_enco
 
 /**
  * @brief Get the copy encoder out of the NEC encoder
- * 
+ *
  * @param encoder NEC encoder pointer
  * @param ret_cpy_enc Return copy encoder
  * @return esp_err_t Status code

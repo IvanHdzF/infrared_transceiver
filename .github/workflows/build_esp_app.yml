@@ -51,4 +51,3 @@ jobs:
             build_${{ matrix.app_name }}_${{ matrix.espidf_target }}/sdkconfig
             build_${{ matrix.app_name }}_${{ matrix.espidf_target }}/flasher_args.json
             build_${{ matrix.app_name }}_${{ matrix.espidf_target }}/config/sdkconfig.json
-
