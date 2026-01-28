@@ -3,5 +3,5 @@
 - [x] Create system_demo app skeleton
 - [x] Define module init interfaces (\*.h)
 - [x] Define event IDs and error codes
-- [ ] Stub orchestrator FSM states
-- [ ] Build passes with empty implementations
+- [x] Stub orchestrator FSM states
+- [x] Build passes with empty implementations
