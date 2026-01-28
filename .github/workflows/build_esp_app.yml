@@ -37,18 +37,22 @@ jobs:
             -B build_${{ matrix.app_name }}_${{ matrix.espidf_target }}
             build
 
-      - name: Run QEMU (${{ matrix.app_name }} / ${{ matrix.espidf_target }})
+      - name: Run Unity tests on QEMU (${{ matrix.app_name }} / ${{ matrix.espidf_target }})
         uses: espressif/esp-idf-ci-action@v1
-        continue-on-error: true
         with:
           esp_idf_version: "v5.4.2"
           target: ${{ matrix.espidf_target }}
           path: "."
           command: >
-            bash -lc "timeout 60
-            idf.py -DAPP_NAME=${{ matrix.app_name }}
-            -B build_${{ matrix.app_name }}_${{ matrix.espidf_target }}
-            qemu"
+            bash -lc "
+            python -m pip install -U pytest pytest-embedded pytest-embedded-idf pytest-embedded-qemu &&
+            pytest apps/${{ matrix.app_name }}/tests \
+            --junit-xml=./test_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
+            --embedded-services idf,qemu \
+            --target=${{ matrix.espidf_target }} \
+            -s
+            "
+
 
 
       - name: Upload artifacts
