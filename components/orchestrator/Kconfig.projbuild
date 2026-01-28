@@ -1,0 +1,8 @@
+menu "Retrofit OS Orchestrator"
+
+config ORCH_USE_MOCK_HANDLERS
+    bool "Use mock handler for testing"
+    default n
+    help
+        Use a mock handler instead of the real one for testing purposes.
+endmenu

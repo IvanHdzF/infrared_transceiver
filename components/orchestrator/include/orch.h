@@ -8,9 +8,14 @@ extern "C" {
 #include "retrofit_os_types.h"
 
 
-os_err_t orchestrator_init(void);
+void orch_init(void);
 
-os_err_t orchestrator_process(const os_evt_t *evt);
+os_err_t orch_process_req(const cmd_ctx_t* ctx);
+
+#if defined(CONFIG_ORCH_USE_MOCK_HANDLERS)
+orch_state_t orch__test_state_get(void);
+void orch__test_state_set(orch_state_t s);
+#endif // CONFIG_ORCH_USE_MOCK_HANDLERS
 
 #ifdef __cplusplus
 }

@@ -1,6 +1,7 @@
 #include "orch.h"
 #include "retrofit_os_types.h"
 #include "evt_bus/evt_bus.h"
+#include "orch_handlers.h"
 
 #include <string.h>
 #include <stdbool.h>
@@ -15,13 +16,13 @@ typedef os_err_t (*orch_handler_t)(uint32_t op_id, const cmd_ctx_t *ctx);
 
 /* static variables */
 static const orch_handler_t handlers[CMD_ID_MAX] = {
-	[CMD_AUTH_LOGIN] = NULL,
-	[CMD_AUTH_LOGOUT] = NULL,
-	[CMD_IR_LEARN_START] = NULL,
-	[CMD_IR_LEARN_CANCEL] = NULL,
-	[CMD_IR_SEND] = NULL,
-	[CMD_SCHED_SET_TABLE] = NULL,
-	[CMD_FACTORY_RESET] = NULL,
+    [CMD_AUTH_LOGIN]      = orch_handle_auth_login,
+    [CMD_AUTH_LOGOUT]     = orch_handle_auth_logout,
+    [CMD_IR_LEARN_START]  = orch_handle_ir_learn_start,
+    [CMD_IR_LEARN_CANCEL] = orch_handle_ir_learn_cancel,
+    [CMD_IR_SEND]         = orch_handle_ir_send,
+    [CMD_SCHED_SET_TABLE] = orch_handle_sched_set_table,
+    [CMD_FACTORY_RESET]   = orch_handle_factory_reset,
 };
 
 
@@ -133,3 +134,14 @@ os_err_t orch_process_req(const cmd_ctx_t* ctx)
 	return handler(op_id, ctx);
 }
 
+/* Conditional testing hooks */
+#if defined(CONFIG_ORCH_USE_MOCK_HANDLERS)
+orch_state_t orch__test_state_get(void)
+{
+    return orch_state_get();
+}
+void orch__test_state_set(orch_state_t s)
+{
+    return orch_state_update(s);
+}
+#endif // CONFIG_ORCH_USE_MOCK_HANDLERS
