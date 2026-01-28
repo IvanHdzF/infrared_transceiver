@@ -46,13 +46,19 @@ jobs:
           command: >
             bash -lc "
             python -m pip install -U pytest pytest-embedded pytest-embedded-idf pytest-embedded-qemu &&
-            pytest apps/${{ matrix.app_name }}/tests \
-            --junit-xml=./test_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
+            pytest apps/${{ matrix.app_name }} \
+            --junit-xml=./report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
             --embedded-services idf,qemu \
             --target=${{ matrix.espidf_target }} \
             -s
             "
-
+        # Skip artifact upload when running under act (no runtime token)
+      - name: Upload test results
+        if: ${{ !env.ACT }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: report_${{ matrix.app_name }}_${{ matrix.espidf_target }}
+          path: report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml
 
 
       - name: Upload artifacts
