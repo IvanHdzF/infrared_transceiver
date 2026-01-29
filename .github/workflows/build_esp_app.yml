@@ -43,14 +43,14 @@ jobs:
           esp_idf_version: "v5.4.2"
           target: ${{ matrix.espidf_target }}
           path: "."
-          command: >
-            python -m pip install -r requirements-dev.txt &&
+          command: |
+            python -m pip install -r requirements.txt
             pytest apps/${{ matrix.app_name }} \
-            --junit-xml=report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
-            --embedded-services idf,qemu \
-            --build-dir ../../build_${{ matrix.app_name }}_${{ matrix.espidf_target }} \
-            --target ${{ matrix.espidf_target }} \
-            -o junit_family=legacy
+              --junit-xml=report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
+              --embedded-services idf,qemu \
+              --build-dir "$GITHUB_WORKSPACE/build_${{ matrix.app_name }}_${{ matrix.espidf_target }}" \
+              --target ${{ matrix.espidf_target }} \
+              -o junit_family=legacy
 
         # Skip artifact upload when running under act (no runtime token)
       - name: Upload test results
