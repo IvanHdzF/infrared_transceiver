@@ -44,7 +44,7 @@ jobs:
           target: ${{ matrix.espidf_target }}
           path: "."
           command: >
-            python -m pip install -r requirements.txt &&
+            python -m pip install -r requirements-dev.txt &&
             pytest apps/${{ matrix.app_name }} \
             --junit-xml=report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
             --embedded-services idf,qemu \
