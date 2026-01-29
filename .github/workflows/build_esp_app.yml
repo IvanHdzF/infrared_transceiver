@@ -48,7 +48,7 @@ jobs:
             pytest apps/${{ matrix.app_name }} \
               --junit-xml=report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
               --embedded-services idf,qemu \
-              --build-dir "$GITHUB_WORKSPACE/build_${{ matrix.app_name }}_${{ matrix.espidf_target }}" \
+              --build-dir "../../build_${{ matrix.app_name }}_${{ matrix.espidf_target }}" \
               --target ${{ matrix.espidf_target }} \
               -o junit_family=legacy
 
