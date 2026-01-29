@@ -42,15 +42,16 @@ jobs:
           PIP_PREFER_BINARY: true
           PIP_INDEX_URL: "https://dl.espressif.com/pypi/"
           PIP_EXTRA_INDEX_URL: "https://pypi.org/simple"
-        run: python -m pip install -r apps/test_evt_bus/requirements.txt
+        run: python -m pip install -r requirements-dev.txt
 
       - name: Run Unity tests on QEMU (${{ matrix.app_name }} / ${{ matrix.espidf_target }})
         run: |
-            pytest apps/${{ matrix.app_name }} \
-              --junit-xml=report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
-              --embedded-services idf,qemu \
-              --build-dir build_${{ matrix.app_name }}_${{ matrix.espidf_target }} \
-              --target=${{ matrix.espidf_target }}
+          pytest apps/${{ matrix.app_name }} \
+            --junit-xml=report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
+            --embedded-services idf,qemu \
+            --build-dir ../../build_${{ matrix.app_name }}_${{ matrix.espidf_target }} \
+            --target ${{ matrix.espidf_target }} \
+            -o junit_family=legacy
         # Skip artifact upload when running under act (no runtime token)
       - name: Upload test results
         if: ${{ !env.ACT }}
