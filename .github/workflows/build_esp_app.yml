@@ -37,6 +37,13 @@ jobs:
             -B build_${{ matrix.app_name }}_${{ matrix.espidf_target }}
             build
 
+      - name: Install Python packages for PyTest
+        env:
+          PIP_PREFER_BINARY: true
+          PIP_INDEX_URL: "https://dl.espressif.com/pypi/"
+          PIP_EXTRA_INDEX_URL: "https://pypi.org/simple"
+        run: python -m pip install -r apps/test_evt_bus/requirements.txt
+
       - name: Run Unity tests on QEMU (${{ matrix.app_name }} / ${{ matrix.espidf_target }})
         uses: espressif/esp-idf-ci-action@v1
         with:
@@ -44,7 +51,6 @@ jobs:
           target: ${{ matrix.espidf_target }}
           path: "."
           command: |
-              python -m pip install -U pytest pytest-embedded pytest-embedded-idf pytest-embedded-qemu
               pytest apps/${{ matrix.app_name }} \
                 --junit-xml=report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
                 --embedded-services idf,qemu \
