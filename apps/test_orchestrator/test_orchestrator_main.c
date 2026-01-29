@@ -9,13 +9,21 @@
 #include <stdint.h>
 #include <stdio.h>
 
-#define SETTLING_TIME_MS    10
-
 // ---- mock handler globals (from orch_handlers_mock.c) ----
 extern volatile uint32_t g_orch_mock_calls_auth_login;
 extern volatile uint32_t g_orch_mock_calls_ir_send;
 extern volatile uint32_t g_orch_mock_last_op_id;
 extern volatile cmd_id_t g_orch_mock_last_cmd_id;
+
+/* Helpers */
+static void wait_orch_state(orch_state_t target)
+{
+    const TickType_t deadline = xTaskGetTickCount() + pdMS_TO_TICKS(200);
+    while (orch__test_state_get() != target) {
+        TEST_ASSERT_TRUE_MESSAGE(xTaskGetTickCount() < deadline, "orch state not applied");
+        vTaskDelay(1);
+    }
+}
 
 // ----------------------------------------------------------
 
@@ -47,7 +55,7 @@ TEST_CASE("orch: state change event gates commands", "[orch]")
     TEST_ASSERT_TRUE(res);
 
     /* Wait for dispatch event */
-    vTaskDelay(pdMS_TO_TICKS(SETTLING_TIME_MS));
+    wait_orch_state(ORCH_LOCKED);
     cmd_ctx_t bad_cmd = {
         .cmd_id = CMD_IR_SEND,
         .client_id = 1,
@@ -69,7 +77,7 @@ TEST_CASE("orch: state change event gates commands", "[orch]")
 
     evt_bus_publish(EVT_ORCH_STATE_CHANGED, &unlock_evt, sizeof(unlock_evt));
     /* Wait for dispatch event */
-    vTaskDelay(pdMS_TO_TICKS(SETTLING_TIME_MS));
+    wait_orch_state(ORCH_NORMAL);
 
     r = orch_process_req(&bad_cmd);
     TEST_ASSERT_EQUAL(OS_OK, r);
@@ -91,7 +99,7 @@ TEST_CASE("orch: login allowed while locked", "[orch]")
     };
     evt_bus_publish(EVT_ORCH_STATE_CHANGED, &lock_evt, sizeof(lock_evt));
     /* Wait for dispatch event */
-    vTaskDelay(pdMS_TO_TICKS(SETTLING_TIME_MS));
+    wait_orch_state(ORCH_LOCKED);
 
     cmd_ctx_t login = {
         .cmd_id = CMD_AUTH_LOGIN,
