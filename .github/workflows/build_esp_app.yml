@@ -49,7 +49,7 @@ jobs:
             pytest apps/${{ matrix.app_name }} \
               --junit-xml=report_${{ matrix.app_name }}_${{ matrix.espidf_target }}.xml \
               --embedded-services idf,qemu \
-              --binary-path build_${{ matrix.app_name }}_${{ matrix.espidf_target }} \
+              --build-dir build_${{ matrix.app_name }}_${{ matrix.espidf_target }} \
               --target=${{ matrix.espidf_target }}
         # Skip artifact upload when running under act (no runtime token)
       - name: Upload test results
