@@ -246,6 +246,17 @@ bool ir_ctrl_is_busy(void);
  */
 esp_err_t print_ir_ctrl_rx_isr_stats(void);
 
+/**
+ * @brief Deinitialize the IR controller.
+ *
+ * Stops the worker task and releases all RMT channels and internal resources.
+ *
+ * @return
+ * - ESP_OK on success
+ * - ESP_ERR_INVALID_STATE if not initialized
+ */
+esp_err_t ir_ctrl_deinit(void);
+
 #ifdef __cplusplus
 }
 #endif
