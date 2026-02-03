@@ -5,12 +5,8 @@
 // - Send: load stored symbols and transmit via copy encoder
 // - States: IDLE / LEARNING / SENDING
 //
-
-//  - Validate slot bounds early (learn_start/send) if you have a fixed slot count in cfg.
-//  - Validate opts.postprocess != NULL when opts.normalize==true (or treat normalize as requiring postprocess).
-//  - Add a monotonically increasing "op_id" in ctx; stamp it into learn_start and compare in RX_DONE to ignore stale completions.
-//  - Ensure cmd_q send failures are surfaced distinctly (ESP_ERR_TIMEOUT / ESP_ERR_NO_MEM) and don’t silently drop ops.
-//  - Enf
+// TODOs / Improvements:
+//  - Make rx debug printing optional via Kconfig
 #include "ir_ctrl/ir_ctrl.h"
 
 #include <string.h>
