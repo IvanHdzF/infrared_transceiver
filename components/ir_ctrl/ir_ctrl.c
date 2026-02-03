@@ -4,7 +4,13 @@
 // - Learn: capture RMT symbols and store via injected callback
 // - Send: load stored symbols and transmit via copy encoder
 // - States: IDLE / LEARNING / SENDING
+//
 
+//  - Validate slot bounds early (learn_start/send) if you have a fixed slot count in cfg.
+//  - Validate opts.postprocess != NULL when opts.normalize==true (or treat normalize as requiring postprocess).
+//  - Add a monotonically increasing "op_id" in ctx; stamp it into learn_start and compare in RX_DONE to ignore stale completions.
+//  - Ensure cmd_q send failures are surfaced distinctly (ESP_ERR_TIMEOUT / ESP_ERR_NO_MEM) and don’t silently drop ops.
+//  - Enf
 #include "ir_ctrl/ir_ctrl.h"
 
 #include <string.h>
@@ -13,8 +19,8 @@
 #include "freertos/queue.h"
 #include "freertos/semphr.h"
 #include "freertos/task.h"
-#include "esp_log.h"
 #include "esp_attr.h"
+#include "esp_log.h"
 #include "driver/rmt_common.h"
 #include "driver/rmt_encoder.h"
 
@@ -24,9 +30,6 @@
 #define IR_CTRL_CMD_QUEUE_DEPTH     (4u)
 #define IR_CTRL_TASK_STACK_WORDS    (4096u)
 #define IR_CTRL_TASK_PRIO           (10u)
-
-#define IR_CTRL_RX_SIGNAL_MIN_NS    (1000u)
-#define IR_CTRL_RX_SIGNAL_MAX_NS    (30000000u)
 
 typedef enum {
     IR_STATE_UNINIT = 0,
@@ -73,11 +76,17 @@ typedef struct {
     ir_state_t state;
 
     uint16_t learn_slot;
+    uint16_t learn_gen;
+    uint16_t active_learn_gen;
     ir_learn_opts_t learn_opts;
     bool learn_opts_present;
 
     rmt_symbol_word_t rx_raw[IR_CTRL_MAX_FRAME_SIZE];
     rmt_symbol_word_t scratch[IR_CTRL_MAX_FRAME_SIZE];
+
+    bool rx_enabled;
+    bool tx_enabled;
+
 } ir_ctrl_ctx_t;
 
 static ir_ctrl_ctx_t s_ctx;
@@ -90,6 +99,7 @@ static inline void ir_lock(void)
 {
     (void)xSemaphoreTake(s_ctx.lock, portMAX_DELAY);
 }
+
 static inline void ir_unlock(void)
 {
     (void)xSemaphoreGive(s_ctx.lock);
@@ -144,20 +154,60 @@ static esp_err_t ir_apply_carrier_if_needed(const ir_send_opts_t *opts)
     return rmt_apply_carrier(s_ctx.tx_chan, &carrier);
 }
 
+static esp_err_t rmt_ensure_rx_channel_enabled(void)
+{
+    if (s_ctx.rx_enabled) {
+        return ESP_OK;
+    }
+
+    esp_err_t err = rmt_enable(s_ctx.rx_chan);
+    if (err == ESP_ERR_INVALID_STATE) {
+        return ESP_OK;
+    }
+    if (err == ESP_OK) {
+        s_ctx.rx_enabled = true;
+    }
+
+    return err;
+}
+
+static esp_err_t rmt_ensure_tx_channel_enabled(void)
+{
+    if (s_ctx.tx_enabled) {
+        return ESP_OK;
+    }
+
+    esp_err_t err = rmt_enable(s_ctx.tx_chan);
+    if (err == ESP_ERR_INVALID_STATE) {
+        return ESP_OK;
+    }
+    if (err == ESP_OK) {
+        s_ctx.tx_enabled = true;
+    }
+
+    return err;
+}
+
 static void ir_ctrl_stop_task(void)
 {
-    if (!s_ctx.task) return;
+    if (!s_ctx.task) {
+        return;
+    }
 
     ir_cmd_msg_t m = { .type = IR_CMD_TASK_STOP };
     (void)xQueueSend(s_ctx.cmd_q, &m, 0);
 
     for (int i = 0; i < 50; i++) {
-        if (eTaskGetState(s_ctx.task) == eDeleted) break;
+        if (eTaskGetState(s_ctx.task) == eDeleted) {
+            break;
+        }
         vTaskDelay(pdMS_TO_TICKS(10));
     }
+
     if (eTaskGetState(s_ctx.task) != eDeleted) {
         vTaskDelete(s_ctx.task);
     }
+
     s_ctx.task = NULL;
 }
 
@@ -238,6 +288,8 @@ static esp_err_t ir_do_learn_start(const ir_cmd_msg_t *cmd)
         ir_finish_to_idle_locked();
         ESP_LOGE(IR_CTRL_TAG, "learn_start: rmt_receive failed: %s", esp_err_to_name(err));
     }
+    s_ctx.learn_gen++;
+    s_ctx.active_learn_gen = s_ctx.learn_gen;
     ir_unlock();
     return err;
 }
@@ -255,6 +307,7 @@ static esp_err_t ir_do_learn_cancel(void)
     }
 
     ESP_LOGI(IR_CTRL_TAG, "learn: cancel");
+    s_ctx.active_learn_gen = 0;
     (void)rmt_disable(s_ctx.rx_chan);
     ir_finish_to_idle_locked();
     ir_unlock();
@@ -288,12 +341,16 @@ static void ir_handle_rx_done(const rmt_rx_done_event_data_t *rx)
     ir_lock();
     st = s_ctx.state;
     slot = s_ctx.learn_slot;
-    ESP_LOGI(IR_CTRL_TAG, "ir_handle_rx_done: slot=%u", (unsigned)slot);
     opts_present = s_ctx.learn_opts_present;
     opts = s_ctx.learn_opts;
     ir_unlock();
 
     if (st != IR_STATE_LEARNING) {
+        return;
+    }
+
+    if (s_ctx.active_learn_gen != s_ctx.learn_gen) {
+        ESP_LOGW(IR_CTRL_TAG, "learn: stale RX done, ignoring");
         return;
     }
 
@@ -414,9 +471,9 @@ static esp_err_t ir_do_send(const ir_cmd_msg_t *cmd)
         goto out;
     }
 
-    err = rmt_enable(s_ctx.tx_chan);
+    err = rmt_ensure_tx_channel_enabled();
     if (err != ESP_OK) {
-        ESP_LOGW(IR_CTRL_TAG, "rmt_enable(tx) failed: %s", esp_err_to_name(err));
+        ESP_LOGW(IR_CTRL_TAG, "rmt_ensure_tx_channel_enabled failed: %s", esp_err_to_name(err));
     }
 
     err = ir_apply_carrier_if_needed(&cmd->u.send.opts);
@@ -591,15 +648,15 @@ esp_err_t ir_ctrl_init(const ir_ctrl_cfg_t *cfg)
         return err;
     }
 
-    err = rmt_enable(s_ctx.tx_chan);
+    err = rmt_ensure_tx_channel_enabled();
     if (err != ESP_OK) {
-        ESP_LOGE(IR_CTRL_TAG, "rmt_enable(tx) failed: %s", esp_err_to_name(err));
+        ESP_LOGE(IR_CTRL_TAG, "rmt_ensure_tx_channel_enabled failed: %s", esp_err_to_name(err));
         return err;
     }
 
-    err = rmt_enable(s_ctx.rx_chan);
+    err = rmt_ensure_rx_channel_enabled();
     if (err != ESP_OK) {
-        ESP_LOGE(IR_CTRL_TAG, "rmt_enable(rx) failed: %s", esp_err_to_name(err));
+        ESP_LOGE(IR_CTRL_TAG, "rmt_ensure_rx_channel_enabled failed: %s", esp_err_to_name(err));
         return err;
     }
 
