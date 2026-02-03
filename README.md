@@ -18,22 +18,20 @@ This is a **systems-oriented repository**, not a single monolithic firmware.
 ```text
 .
 ├─ apps/                 # Application entry points (selectable at build time)
-│  ├─ infrared_test/     # IR bring-up and protocol experiments (NEC, RMT)
-│  ├─ ble_test/          # BLE communication experiments
-│  └─ system_demo/       # System integration demo (orchestrator + services)
+│  ├─ system_demo/           # System integration demo (WIP)
+│  ├─ test_evt_bus/          # Event Bus integration tests for external dependency embedded evt bus
+│  ├─ test_ir_ctrl/          # Integration tests for Infrared learn/replay controller
+│  ├─ test_orchestrator/     # Integration tests for orchestrator + EVT Bus
+│  └─ test_stg_man/          # Integration tests for storage manager component (FAT + WL)
 │
 ├─ components/           # System-level reusable components (always compiled)
-│  ├─ event_bus/
-│  ├─ storage/
-│  ├─ ir_service/
-│  ├─ scheduler/
+│  ├─ ir_ctrl/
 │  ├─ orchestrator/
-│  ├─ auth/
-│  └─ error_manager/
+│  ├─ retrofit_os/
+│  └─ stg_man/
 │
-├─ middlewares/          # Optional, application-selected generic modules
-│  ├─ ir_generic/
-│  └─ rtc_generic/
+├─ externals/          # Optional, application-selected generic modules
+│  └─ embedded_evt_bus/
 │
 ├─ managed_components/   # ESP-IDF managed dependencies
 │
@@ -66,7 +64,7 @@ This is a **systems-oriented repository**, not a single monolithic firmware.
 Applications live under `apps/` and are selected at build time via CMake:
 
 ```bash
-idf.py -DAPP_NAME=infrared_test build
+idf.py -DAPP_NAME=system_demo build
 ```
 
 Each application:
@@ -159,7 +157,7 @@ git submodule update --init --recursive
 ### Select an Application
 
 ```bash
-idf.py -DAPP_NAME=infrared_test build
+idf.py -DAPP_NAME=system_demo build
 idf.py -DAPP_NAME=system_demo flash monitor
 ```
 

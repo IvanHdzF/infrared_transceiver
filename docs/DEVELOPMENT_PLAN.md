@@ -106,7 +106,6 @@ Priority is given to **clean interfaces**, **unit-testable modules**, and **earl
 - IR public API:
   - learn start/abort
   - send slot
-  - send waveform (optional)
 - Internal state machine: IDLE / LEARNING / SENDING
 - IR slot format:
   - header: len/crc/carrier/repeat/gap + version
