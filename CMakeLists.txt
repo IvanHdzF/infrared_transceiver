@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 
 # Choose which app to build
-set(APP_NAME "test_ir_ctrl" CACHE STRING "Select which application to build")
+set(APP_NAME "system_demo" CACHE STRING "Select which application to build")
 message(STATUS "Building application: ${APP_NAME}")
 
 # Paths
@@ -41,6 +41,7 @@ message(STATUS "SDKCONFIG_DEFAULTS: ${SDKCONFIG_DEFAULTS}")
 set(APP_COMPONENTS_infrared_test "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
 set(APP_COMPONENTS_test_evt_bus "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
 set(APP_COMPONENTS_system_demo "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
+set(APP_COMPONENTS_test_ble "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
 set(APP_COMPONENTS_test_orchestrator "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
 set(APP_COMPONENTS_test_stg_man "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
 set(APP_COMPONENTS_test_ir_ctrl "${CUSTOM_ROOT_PATH}/externals/embedded_evt_bus/ports/esp-idf/evt_bus")
