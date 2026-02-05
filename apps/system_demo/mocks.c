@@ -36,7 +36,7 @@ static mock_wifi_t  g_wifi;
 static mock_power_t g_pwr;
 
 /* -------------------------------------------------------------------------- */
-/* Fake “event bus deliver” for Sprint 0.
+/* Fake "event bus deliver" for Sprint 0.
  * Replace with real event_bus_publish() later.
  * For now we just log the event and (optionally) call orchestrator hook.
  * -------------------------------------------------------------------------- */
@@ -66,7 +66,7 @@ static void mock_publish(os_mod_id_t src, os_evt_id_t id, const void *payload, u
 }
 
 /* -------------------------------------------------------------------------- */
-/* Mock init APIs (match your planned “real” module init names eventually)     */
+/* Mock init APIs (match your planned "real" module init names eventually)     */
 /* -------------------------------------------------------------------------- */
 
 os_err_t mock_auth_init(void)
@@ -139,7 +139,7 @@ os_err_t mock_event_bus_init(void)
 }
 
 /* -------------------------------------------------------------------------- */
-/* Mock “tick/process” to generate realistic events                            */
+/* Mock "tick/process" to generate realistic events                            */
 /* Call this from your main loop initially.                                   */
 /* -------------------------------------------------------------------------- */
 

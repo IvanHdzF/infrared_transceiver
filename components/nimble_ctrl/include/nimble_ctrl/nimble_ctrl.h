@@ -50,7 +50,7 @@ typedef struct {
  *
  * Return 0 on success, negative on failure.
  */
-typedef esp_err_t (*nimble_ctrl_gatt_register_fn)(void* user);
+typedef const struct ble_gatt_svc_def* (*nimble_ctrl_gatt_get_svc_fn)(void* user);
 
 /* Security configuration (applied if enabled) */
 typedef struct {
@@ -77,7 +77,7 @@ typedef struct {
     nimble_ctrl_cbs_t cbs;
     void*                user;
 
-    nimble_ctrl_gatt_register_fn gatt_register; /* optional unless PERIPHERAL */
+    nimble_ctrl_gatt_get_svc_fn get_gatt_svc; /* optional unless PERIPHERAL */
 
     nimble_ctrl_security_cfg_t security;
     nimble_ctrl_adv_cfg_t      advertising;

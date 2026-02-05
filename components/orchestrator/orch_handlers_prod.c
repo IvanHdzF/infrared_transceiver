@@ -4,7 +4,7 @@
 #include <stdint.h>
 
 /*
- * Production “barebones” handlers.
+ * Production "barebones" handlers.
  * These are the symbols your dispatch table points to.
  *
  * NOTE: Replace the TODOs with calls into your real modules (auth/ir/ota/etc).

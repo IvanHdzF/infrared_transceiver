@@ -1,4 +1,9 @@
-set(srcs "nimble_ctrl.c")
+set(
+    srcs
+    "nimble_ctrl.c"
+    "nimble_ctrl_gap.c"
+    "nimble_ctrl_gatt.c"
+)
 
 idf_component_register(
     SRCS
@@ -11,4 +16,5 @@ idf_component_register(
 
     PRIV_REQUIRES
         bt
+        nvs_flash
 )

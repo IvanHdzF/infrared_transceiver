@@ -193,7 +193,7 @@ typedef struct {
 } evt_cmd_rejected_t;
 
 /* ==========================================================================
- * Optional contracts for “init/process” style modules
+ * Optional contracts for "init/process" style modules
  * ========================================================================== */
 
 typedef os_err_t (*os_init_fn_t)(void);

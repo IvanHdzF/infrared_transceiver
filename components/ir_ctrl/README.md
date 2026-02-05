@@ -36,7 +36,7 @@ It **does not** decode/encode NEC/etc; any protocol logic lives outside via opti
 - Stored waveform blob is `rmt_frame_obj_t`:
   - `rmt_frame_data[64]` symbol buffer
   - `num_syms` valid count
-- Slots are **external**: this component does not define slot count or persistence format beyond “store/load this blob”.
+- Slots are **external**: this component does not define slot count or persistence format beyond "store/load this blob".
 
 > Note: persisting `rmt_frame_obj_t` directly ties storage to ESP-IDF’s `rmt_symbol_word_t` layout.
 
@@ -118,7 +118,7 @@ It **does not** decode/encode NEC/etc; any protocol logic lives outside via opti
 ### Send / slot info
 
 - `ESP_ERR_INVALID_STATE`: not inited / busy / missing `load_frame_func`
-- `ESP_ERR_NOT_FOUND`: slot missing (storage says “no”)
+- `ESP_ERR_NOT_FOUND`: slot missing (storage says "no")
 - `ESP_ERR_INVALID_SIZE`: stored blob size mismatch or `num_syms` out of bounds
 - Carrier override invalid if:
   - `carrier_hz==0`
