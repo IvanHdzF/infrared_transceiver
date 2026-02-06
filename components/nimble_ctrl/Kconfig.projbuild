@@ -1,0 +1,14 @@
+menu "NimBLE Controller"
+
+config NIMBLE_CTRL_USE_TEST_HOOKS
+    bool "Use mock handler for testing"
+    default n
+    help
+        Compile and expose test hooks for the NimBLE Controller component.
+
+config NIMBLE_CTRL_MAX_GATT_DB_ENTRIES
+    int "Max GATT DB entries"
+    default 32
+    help
+        Maximum number of GATT DB entries that can be registered with the NimBLE Controller component. This is used to size internal data structures for managing GATT access callbacks and storage bindings.
+endmenu

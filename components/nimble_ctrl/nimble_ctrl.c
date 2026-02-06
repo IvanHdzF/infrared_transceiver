@@ -137,6 +137,9 @@ int nimble_ctrl_init(const nimble_ctrl_cfg_t* cfg)
         return -EIO;
     }
 
+    /* Initialize GATT DB */
+    nimble_ctrl_gatt_db_init(&s_ctx.gatt_db);
+
     /* Host callbacks / GAP setup lives in nimble_ctrl_gap.c */
     rc = nimble_ctrl_gap_init();
     if (rc != 0) {
@@ -190,6 +193,8 @@ int nimble_ctrl_stop(void)
     (void)nimble_ctrl_gap_stop();
     nimble_port_stop(); /* Host task will exit and deinit in ble_host_task() */
 
+    nimble_ctrl_gatt_db_reset(&s_ctx.gatt_db);
+
     s_ctx.started = false;
     return 0;
 }
@@ -221,6 +226,63 @@ int nimble_ctrl_notify(uint16_t conn_handle, uint16_t attr_handle, const void* d
     if (data == NULL || len == 0) return -EINVAL;
     return nimble_ctrl_gatt_notify(conn_handle, attr_handle, data, len);
 }
+
+int nimble_ctrl_gatt_bind_chr(uint16_t val_handle,
+                              nimble_ctrl_gatt_read_cb_t read_cb,
+                              nimble_ctrl_gatt_write_cb_t write_cb,
+                              void* user
+                             )
+{
+    return nimble_ctrl_gatt_db_bind_chr(val_handle, read_cb, write_cb, user, &s_ctx.gatt_db);
+}
+
+int nimble_ctrl_gatt_bind_dsc(uint16_t dsc_handle,
+                              nimble_ctrl_gatt_read_cb_t read_cb,
+                              nimble_ctrl_gatt_write_cb_t write_cb,
+                              void* user
+                             )
+{
+    return nimble_ctrl_gatt_db_bind_dsc(dsc_handle, read_cb, write_cb, user, &s_ctx.gatt_db);
+}
+
+int nimble_ctrl_gatt_bind_storage(uint16_t val_handle,
+                                  void* buf,
+                                  uint16_t min_len,
+                                  uint16_t max_len,
+                                  bool notify_on_write,
+                                  void* user
+                                 )
+{
+    return nimble_ctrl_gatt_db_bind_storage(val_handle, buf, min_len, max_len, notify_on_write, user, &s_ctx.gatt_db);
+}
+
+void nimble_ctrl_gatt_clear_all()
+{
+    return nimble_ctrl_gatt_db_clear_all(&s_ctx.gatt_db);
+}
+
+int nimble_ctrl_gatt_access_cb(uint16_t conn_handle,
+                               uint16_t attr_handle,
+                               struct ble_gatt_access_ctxt* ctxt,
+                               void* arg)
+{
+    (void)arg; // unused; could be used to pass a pointer to the db if you want multiple instances, or just ignore and use the singleton s_ctx.gatt_db
+    return nimble_ctrl_gatt_db_access_cb(conn_handle, attr_handle, ctxt, &s_ctx.gatt_db);
+}
+
+#if (CONFIG_NIMBLE_CTRL_USE_TEST_HOOKS == y)
+int nimble_ctrl_test_gap_inject_evt(struct ble_gap_event* event, void* arg)
+{
+    if (!s_ctx.inited) return -EINVAL;
+    return nimble_ctrl_gap_inject_evt(event, arg);
+}
+#endif
+
+bool nimble_ctrl_test_is_started(void)
+{
+    return s_ctx.started;
+}
+
 #ifdef __cplusplus
 }
 #endif

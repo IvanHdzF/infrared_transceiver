@@ -6,6 +6,10 @@
 #include <stddef.h>
 #include "esp_err.h"
 
+#if(CONFIG_NIMBLE_CTRL_USE_TEST_HOOKS == y)
+#include "host/ble_gap.h"
+#endif
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -83,6 +87,26 @@ typedef struct {
     nimble_ctrl_adv_cfg_t      advertising;
 } nimble_ctrl_cfg_t;
 
+typedef int (*nimble_ctrl_gatt_read_cb_t)(
+    uint16_t conn_handle,
+    uint16_t attr_handle,
+    struct ble_gatt_access_ctxt* ctxt,
+    void* user);
+
+typedef int (*nimble_ctrl_gatt_write_cb_t)(
+    uint16_t conn_handle,
+    uint16_t attr_handle,
+    struct ble_gatt_access_ctxt* ctxt,
+    void* user);
+
+/* Optional: fixed-length storage binding (PUBLIC) */
+typedef struct {
+    void*    buf;
+    uint16_t min_len;
+    uint16_t max_len;
+    bool     notify_on_write;   // if true, call ble_gatts_chr_updated(attr_handle) after write
+} nimble_ctrl_gatt_storage_t;
+
 /* ============================================================================
  *  API
  * ==========================================================================*/
@@ -108,6 +132,54 @@ int nimble_ctrl_notify(uint16_t conn_handle,
                        uint16_t attr_handle,
                        const void* data,
                        size_t len);
+
+/* DB APIs */
+
+int nimble_ctrl_gatt_bind_chr(uint16_t val_handle,
+                              nimble_ctrl_gatt_read_cb_t read_cb,
+                              nimble_ctrl_gatt_write_cb_t write_cb,
+                              void* user
+                             );
+
+int nimble_ctrl_gatt_bind_dsc(uint16_t dsc_handle,
+                              nimble_ctrl_gatt_read_cb_t read_cb,
+                              nimble_ctrl_gatt_write_cb_t write_cb,
+                              void* user
+                             );
+
+int nimble_ctrl_gatt_bind_storage(uint16_t val_handle,
+                                  void* buf,
+                                  uint16_t min_len,
+                                  uint16_t max_len,
+                                  bool notify_on_write,
+                                  void* user
+                                 );
+
+void nimble_ctrl_gatt_clear_all();
+
+int nimble_ctrl_gatt_access_cb(uint16_t conn_handle,
+                               uint16_t attr_handle,
+                               struct ble_gatt_access_ctxt* ctxt,
+                               void* arg); // arg comes from .arg in chr/dsc def (can be NULL)
+
+#if (CONFIG_NIMBLE_CTRL_USE_TEST_HOOKS == y)
+/**
+ * @brief Inject GAP event for testing purposes.
+ *
+ * @param event
+ * @param arg
+ * @return int
+ */
+int nimble_ctrl_test_gap_inject_evt(struct ble_gap_event* event, void* arg);
+
+/**
+ * @brief Get nimble controller started state for testing purposes.
+ *
+ * @return true
+ * @return false
+ */
+bool nimble_ctrl_test_is_started(void);
+#endif
 
 #ifdef __cplusplus
 }

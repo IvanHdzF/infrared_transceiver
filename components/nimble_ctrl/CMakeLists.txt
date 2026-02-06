@@ -3,6 +3,7 @@ set(
     "nimble_ctrl.c"
     "nimble_ctrl_gap.c"
     "nimble_ctrl_gatt.c"
+    "nimble_ctrl_gatt_db.c"
 )
 
 idf_component_register(

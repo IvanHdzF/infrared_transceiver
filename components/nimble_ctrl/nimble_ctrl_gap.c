@@ -337,6 +337,7 @@ int nimble_ctrl_gap_adv_start(void)
         fields.name_is_complete = 1;
         ESP_LOGI(TAG_GAP, "Advertising name: %s", name);
     }
+    ESP_LOGI(TAG_GAP, "Advertising with params: name = %s and len=%d", name ? name : "<none>", fields.name_len);
 #endif
 
     rc = ble_gap_adv_set_fields(&fields);
@@ -370,6 +371,14 @@ int nimble_ctrl_gap_adv_stop(void)
     s_gap.adv_active = false;
     return 0;
 }
+
+#if (CONFIG_NIMBLE_CTRL_USE_TEST_HOOKS == y)
+int nimble_ctrl_gap_inject_evt(struct ble_gap_event* event, void* arg)
+{
+    (void)arg;
+    return gap_event(event, arg);
+}
+#endif
 
 #ifdef __cplusplus
 }
